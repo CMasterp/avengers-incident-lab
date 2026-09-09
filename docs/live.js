@@ -28,7 +28,7 @@ let report = null;
 let relayOnline = false;
 let operation = null;
 let activeEventSource = null;
-let voiceEnabled = false;
+let voiceEnabled = true;
 let recognition = null;
 let robot = null;
 
@@ -56,7 +56,6 @@ function setPhase(phase, message) {
   ui.badge.textContent = stateLabel(phase);
   ui.badge.dataset.state = phase;
   robot?.setState(phase, detail.color);
-  if (voiceEnabled && ["commented", "resolved", "error"].includes(phase)) speak(message || detail.message);
 }
 
 function stateLabel(state) {
@@ -212,7 +211,9 @@ function handleOperationEvent(event) {
   log(message, phase === "error" ? "error" : "intel");
   if (phase && PHASES[phase]) setPhase(phase, message);
   if (Array.isArray(event.agents)) renderAgents(event.agents);
-  if (["completed", "complete", "resolved", "commented", "idle", "error"].includes(event.type || phase)) {
+  const isTerminal = ["completed", "complete", "resolved", "commented", "idle", "error"].includes(event.type || phase);
+  if (isTerminal) {
+    if (voiceEnabled) speak(message);
     activeEventSource?.close(); activeEventSource = null; operation = null;
     loadPublicReport(true);
   }
