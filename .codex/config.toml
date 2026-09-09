@@ -1,0 +1,5 @@
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+http_headers_helper = ".codex/github-mcp-headers.sh"
+required = true
+default_tools_approval_mode = "writes"
