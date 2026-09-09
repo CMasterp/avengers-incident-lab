@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "updatedAt": "2026-09-09T15:30:00.000Z",
+  "mission": {
+    "status": "idle",
+    "label": "Standing by for a Nexus event",
+    "summary": "Select the demo pull request, then ask JARVIS to begin the investigation."
+  },
+  "pullRequest": {
+    "repository": "CMasterp/avengers-incident-lab",
+    "number": null,
+    "title": "No mission selected",
+    "url": "",
+    "head": "",
+    "base": "main"
+  },
+  "agents": [
+    {
+      "id": "diff-analyst",
+      "name": "Iron Man",
+      "role": "Diff Analyst",
+      "status": "standby",
+      "summary": "Awaiting a pull request."
+    },
+    {
+      "id": "security-impact",
+      "name": "Black Widow & Doctor Strange",
+      "role": "Security & Impact Reviewer",
+      "status": "standby",
+      "summary": "Awaiting a pull request."
+    },
+    {
+      "id": "test-reviewer",
+      "name": "Hulk",
+      "role": "Test Reviewer",
+      "status": "standby",
+      "summary": "Awaiting a pull request."
+    }
+  ],
+  "timeline": [
+    {
+      "at": "2026-09-09T15:30:00.000Z",
+      "event": "S.H.I.E.L.D. systems online",
+      "detail": "JARVIS is ready to investigate a pull request.",
+      "state": "complete"
+    }
+  ],
+  "findings": [],
+  "threads": [],
+  "summary": {
+    "openThreads": 0,
+    "resolvedThreads": 0,
+    "threatLevel": "none",
+    "message": "No active incident."
+  }
+}

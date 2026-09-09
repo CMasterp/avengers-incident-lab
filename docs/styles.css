@@ -1,0 +1,86 @@
+:root {
+  color-scheme: dark;
+  --void: #060a12;
+  --panel: rgba(17, 28, 46, 0.82);
+  --line: rgba(126, 166, 209, 0.2);
+  --text: #eff7ff;
+  --muted: #94a8bb;
+  --blue: #53b7ff;
+  --cyan: #55f1e5;
+  --red: #ff5f6d;
+  --orange: #ffb35a;
+  --green: #7af0b3;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-width: 320px;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(28, 86, 142, 0.35), transparent 28rem),
+    radial-gradient(circle at 90% 10%, rgba(107, 31, 61, 0.28), transparent 28rem),
+    var(--void);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button, a { font: inherit; }
+a { color: var(--cyan); }
+.shell { width: min(1180px, calc(100% - 2rem)); margin: 0 auto; padding: 2rem 0 4rem; }
+.topbar, .brand, .system-status, .mission-meta, .section-heading, .progress-numbers { display: flex; align-items: center; }
+.topbar { justify-content: space-between; gap: 1.5rem; border-bottom: 1px solid var(--line); padding-bottom: 1.5rem; }
+.brand { gap: 1rem; }
+.brand-mark { display: grid; place-items: center; width: 3.2rem; height: 3.2rem; border: 1px solid var(--cyan); border-radius: 50%; color: var(--cyan); font-size: 1.8rem; box-shadow: 0 0 24px rgba(85, 241, 229, 0.35); }
+h1, h2, p { margin: 0; }
+h1 { font-size: clamp(1.3rem, 3vw, 2rem); letter-spacing: -0.04em; }
+h2 { font-size: clamp(1.1rem, 2.5vw, 1.45rem); }
+.eyebrow { color: var(--cyan); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.16em; }
+.system-status { gap: 0.7rem; color: var(--muted); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; }
+.pulse { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); }
+button { cursor: pointer; border: 1px solid var(--cyan); border-radius: 0.45rem; padding: 0.55rem 0.8rem; color: var(--void); background: var(--cyan); font-weight: 800; }
+.panel { border: 1px solid var(--line); border-radius: 1rem; background: linear-gradient(145deg, rgba(22, 40, 65, 0.88), var(--panel)); box-shadow: inset 0 1px rgba(255, 255, 255, 0.04); }
+.hero-grid { display: grid; grid-template-columns: 1.65fr 0.7fr 0.85fr; gap: 1rem; margin: 1.5rem 0 2.5rem; }
+.hero-grid > * { padding: 1.4rem; }
+.mission-card h2, .threat-card strong { margin: 0.55rem 0; }
+.mission-card > p:not(.eyebrow), .threat-card p, .finding-body, .agent-card p, .thread-detail, .timeline-detail { color: var(--muted); line-height: 1.55; }
+.mission-meta { gap: 1rem; margin-top: 1rem; font-size: 0.85rem; flex-wrap: wrap; }
+.threat-card strong { display: block; color: var(--cyan); font-size: 1.75rem; }
+.threat-card strong[data-level="critical"], .severity-critical { color: var(--red); }
+.threat-card strong[data-level="high"], .severity-high { color: var(--orange); }
+.threat-card strong[data-level="medium"], .severity-medium { color: #f5df74; }
+.threat-card strong[data-level="low"], .severity-low { color: var(--green); }
+.progress-numbers { gap: 0.4rem; margin: 0.8rem 0; color: var(--muted); }
+.progress-numbers strong { color: var(--text); font-size: 1.5rem; margin-left: 0.65rem; }
+.progress-numbers strong:first-child { margin-left: 0; }
+.meter { overflow: hidden; height: 0.45rem; border-radius: 1rem; background: rgba(255,255,255,0.09); }
+.meter span { display: block; height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green)); transition: width 0.35s ease; }
+.section-heading { justify-content: space-between; gap: 1rem; margin: 2.3rem 0 0.8rem; }
+.section-heading h2 { margin-top: 0.25rem; }
+.section-heading > p, time { color: var(--muted); font-size: 0.8rem; }
+.timeline { list-style: none; padding: 0.3rem 1.2rem; }
+.timeline li { position: relative; padding: 1rem 0 1rem 1.5rem; border-left: 1px solid var(--line); }
+.timeline li::before { content: ""; position: absolute; left: -0.31rem; top: 1.25rem; width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 10px rgba(85, 241, 229, 0.8); }
+.timeline-title { display: flex; justify-content: space-between; gap: 1rem; font-weight: 800; }
+.timeline-title time { white-space: nowrap; }
+.agent-grid, .finding-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+.agent-card, .finding-card { padding: 1.15rem; }
+.agent-card header, .finding-card header, .thread-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.agent-card h3, .finding-card h3 { margin: 0.35rem 0 0.55rem; font-size: 1rem; }
+.badge { border: 1px solid var(--line); border-radius: 10rem; padding: 0.25rem 0.5rem; color: var(--cyan); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.badge[data-state="complete"], .badge[data-state="resolved"] { border-color: rgba(122,240,179,.45); color: var(--green); }
+.badge[data-state="error"] { border-color: rgba(255,95,109,.45); color: var(--red); }
+.finding-card { border-top: 3px solid var(--cyan); }
+.finding-card[data-hero="BLACK_WIDOW"] { border-top-color: #ff6e9d; }
+.finding-card[data-hero="DOCTOR_STRANGE"] { border-top-color: #c280ff; }
+.finding-card[data-hero="HULK"] { border-top-color: var(--green); }
+.finding-card footer { display: flex; justify-content: space-between; gap: 1rem; margin-top: 1rem; color: var(--muted); font-size: 0.78rem; }
+.evidence { margin-top: 0.8rem; padding: 0.7rem; border-left: 2px solid var(--cyan); background: rgba(0,0,0,0.16); font-size: 0.8rem; }
+.evidence p { margin: 0.35rem 0; color: var(--muted); }
+.thread-list { padding: 0 1.2rem; }
+.thread-row { padding: 1rem 0; border-bottom: 1px solid var(--line); }
+.thread-row:last-child { border-bottom: 0; }
+.thread-row h3 { margin: 0 0 0.35rem; font-size: 0.95rem; }
+.empty-state { grid-column: 1 / -1; padding: 1.4rem; color: var(--muted); text-align: center; }
+@media (max-width: 840px) { .hero-grid { grid-template-columns: 1fr; } .agent-grid, .finding-grid { grid-template-columns: 1fr; } .topbar { align-items: flex-start; flex-direction: column; } }
+@media (max-width: 520px) { .shell { width: min(100% - 1rem, 1180px); } .section-heading { align-items: flex-start; flex-direction: column; } }

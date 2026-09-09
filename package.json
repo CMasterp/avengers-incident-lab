@@ -1,0 +1,11 @@
+{
+  "name": "avengers-incident-lab",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Controlled PR review target for the JARVIS MCP hackathon demo.",
+  "scripts": {
+    "test": "node --test",
+    "validate:report": "node scripts/validate-report.mjs"
+  }
+}
