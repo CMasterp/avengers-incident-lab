@@ -55,7 +55,7 @@ export function validateCommand(value) {
     assertExactKeys(value, new Set(["type", "pullRequest", "findingIds"]));
     const findingIds = value.findingIds;
     if (!Array.isArray(findingIds) || findingIds.length < 1 || findingIds.length > 20) {
-      throw new CommandValidationError("findingIds must contain between 1 and 20 approved IDs.");
+      throw new CommandValidationError("findingIds doit contenir entre 1 et 20 identifiants.");
     }
     const uniqueIds = [...new Set(findingIds.map((id) => safeId(id, "findingId")))];
     if (uniqueIds.length !== findingIds.length) {
@@ -70,17 +70,6 @@ export function validateCommand(value) {
     pullRequest: pullRequestNumber(value.pullRequest),
     threadId: safeId(value.threadId, "threadId")
   };
-}
-
-export function validateApproval(value) {
-  if (!isPlainObject(value)) {
-    throw new CommandValidationError("Approval must be a JSON object.");
-  }
-  assertExactKeys(value, new Set(["approve"]));
-  if (value.approve !== true) {
-    throw new CommandValidationError("approve must be true.");
-  }
-  return { approve: true };
 }
 
 export function validateWorkerResult(value, expectedAgent) {

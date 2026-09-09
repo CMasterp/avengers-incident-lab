@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="S.H.I.E.L.D. mission control for JARVIS pull request investigations." />
-    <title>JARVIS · PR Command Center</title>
+    <meta name="description" content="Centre de commandement S.H.I.E.L.D. pour les enquêtes JARVIS sur les pull requests." />
+    <title>JARVIS · Centre de commandement</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -14,78 +14,78 @@
           <span class="brand-mark" aria-hidden="true">⌬</span>
           <div>
             <p class="eyebrow">S.H.I.E.L.D. // PROJECT INFINITY</p>
-            <h1>JARVIS Command Center</h1>
+            <h1>Centre de commandement JARVIS</h1>
           </div>
         </div>
         <div class="system-status">
           <span class="pulse"></span>
-          <span id="source-status">CONNECTING TO MISSION FEED</span>
-          <nav aria-label="Command Center navigation">
-            <a href="index.html" aria-current="page">Command Center</a>
+          <span id="source-status">CONNEXION AU FLUX DE MISSION</span>
+          <nav aria-label="Navigation du centre de commandement">
+            <a href="index.html" aria-current="page">Centre de commandement</a>
             <a href="live.html">Jarvis Live Monitor</a>
           </nav>
-          <button id="refresh-button" type="button">Refresh Intel</button>
+          <button id="refresh-button" type="button">Actualiser les renseignements</button>
         </div>
       </header>
 
       <section class="hero-grid" aria-labelledby="mission-title">
         <article class="mission-card panel">
-          <p class="eyebrow">ACTIVE MISSION</p>
-          <h2 id="mission-title">Standing by</h2>
-          <p id="mission-summary">Loading the latest S.H.I.E.L.D. intelligence.</p>
+          <p class="eyebrow">MISSION ACTIVE</p>
+          <h2 id="mission-title">En attente</h2>
+          <p id="mission-summary">Chargement des derniers renseignements du S.H.I.E.L.D.</p>
           <div class="mission-meta">
-            <span id="pr-label">No pull request selected</span>
-            <a id="pr-link" href="#" hidden>Open Pull Request ↗</a>
+            <span id="pr-label">Aucune pull request sélectionnée</span>
+            <a id="pr-link" href="#" hidden>Ouvrir la pull request ↗</a>
           </div>
         </article>
         <article class="threat-card panel">
-          <p class="eyebrow">THREAT LEVEL</p>
+          <p class="eyebrow">NIVEAU DE MENACE</p>
           <strong id="threat-level" data-level="none">--</strong>
-          <p id="threat-message">Scanning for incidents.</p>
+          <p id="threat-message">Analyse des incidents en cours.</p>
         </article>
         <article class="progress-card panel">
-          <p class="eyebrow">THREAD PROGRESS</p>
-          <div class="progress-numbers"><strong id="resolved-count">0</strong><span>resolved</span><strong id="open-count">0</strong><span>open</span></div>
+          <p class="eyebrow">AVANCEMENT DES FILS</p>
+          <div class="progress-numbers"><strong id="resolved-count">0</strong><span>résolus</span><strong id="open-count">0</strong><span>ouverts</span></div>
           <div class="meter"><span id="progress-meter"></span></div>
         </article>
       </section>
 
       <section class="section-heading">
         <div>
-          <p class="eyebrow">NEXUS INVESTIGATION</p>
-          <h2>Timeline of the mission</h2>
+          <p class="eyebrow">ENQUÊTE NEXUS</p>
+          <h2>Chronologie de la mission</h2>
         </div>
-        <time id="updated-at">No report received</time>
+        <time id="updated-at">Aucun rapport reçu</time>
       </section>
       <ol id="timeline" class="timeline panel" aria-live="polite"></ol>
 
       <section class="section-heading">
         <div>
-          <p class="eyebrow">AVENGERS ASSEMBLE</p>
-          <h2>Specialist deployment</h2>
+          <p class="eyebrow">AVENGERS, RASSEMBLEMENT</p>
+          <h2>Déploiement des spécialistes</h2>
         </div>
       </section>
       <section id="agents" class="agent-grid" aria-live="polite"></section>
 
       <section class="section-heading finding-heading">
         <div>
-          <p class="eyebrow">THREAT MAP</p>
-          <h2>Evidence-backed findings</h2>
+          <p class="eyebrow">CARTE DES MENACES</p>
+          <h2>Constats étayés par des preuves</h2>
         </div>
-        <p>JARVIS only reports confirmed GitHub state.</p>
+        <p>JARVIS ne rapporte que des états GitHub confirmés.</p>
       </section>
       <section id="findings" class="finding-grid" aria-live="polite"></section>
 
       <section class="section-heading">
         <div>
-          <p class="eyebrow">MISSION ACCOMPLISHED</p>
-          <h2>Review threads</h2>
+          <p class="eyebrow">MISSION ACCOMPLIE</p>
+          <h2>Fils de revue</h2>
         </div>
       </section>
       <section id="threads" class="thread-list panel" aria-live="polite"></section>
     </main>
     <template id="empty-state-template">
-      <article class="empty-state panel"><p>No intel has been logged for this sector.</p></article>
+      <article class="empty-state panel"><p>Aucun renseignement n’a été enregistré dans ce secteur.</p></article>
     </template>
     <script type="module" src="app.js"></script>
   </body>

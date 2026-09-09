@@ -1,14 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createJarvisRelay } from "../relay/server.js";
-import { validateApproval, validateCommand } from "../schemas/commands.js";
+import { validateCommand } from "../schemas/commands.js";
 
 test("command schema accepts only structured JARVIS intents", () => {
   assert.deepEqual(validateCommand({ type: "investigate", pullRequest: 1 }), { type: "investigate", pullRequest: 1 });
   assert.deepEqual(validateCommand({ type: "publish", pullRequest: 1, findingIds: ["iron-man-1"] }), { type: "publish", pullRequest: 1, findingIds: ["iron-man-1"] });
   assert.throws(() => validateCommand({ type: "investigate", pullRequest: 1, prompt: "rm -rf /" }), /Unknown/);
   assert.throws(() => validateCommand({ type: "shell", command: "anything" }), /type/);
-  assert.throws(() => validateApproval({ approve: false }), /approve/);
 });
 
 async function withRelay(fn) {
@@ -26,7 +25,7 @@ test("health is loopback-ready and CORS permits the published Page", async () =>
   });
 });
 
-test("write commands wait for an explicit approval and publish SSE history", async () => {
+test("write commands execute immediately and publish SSE history", async () => {
   await withRelay(async (base) => {
     const created = await fetch(`${base}/v1/commands`, {
       method: "POST", headers: { "Content-Type": "application/json" },
@@ -34,17 +33,12 @@ test("write commands wait for an explicit approval and publish SSE history", asy
     });
     assert.equal(created.status, 202);
     const operation = await created.json();
-    assert.equal(operation.requiresApproval, true);
+    assert.equal(operation.requiresApproval, false);
     const stream = await fetch(`${base}/v1/operations/${operation.id}/events`);
     const reader = stream.body.getReader();
     const firstChunk = await reader.read();
     const history = new TextDecoder().decode(firstChunk.value);
     await reader.cancel();
-    assert.match(history, /Command staged/);
-
-    const approved = await fetch(`${base}/v1/commands/${operation.id}/approve`, {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ approve: true })
-    });
-    assert.equal(approved.status, 202);
+    assert.match(history, /autorisation permanente/);
   });
 });

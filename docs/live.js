@@ -4,13 +4,12 @@ const RELAY_ORIGIN = "http://127.0.0.1:4318";
 const PUBLIC_REPORT_URL = new URL("mission-report.json", window.location.href).href;
 const POLL_INTERVAL = 15000;
 const PHASES = {
-  idle: { label: "STANDING BY", color: "#55b7ff", message: "JARVIS is standing by for a mission." },
-  listening: { label: "LISTENING", color: "#55f1e5", message: "Voice and text command channel open." },
-  investigating: { label: "NEXUS INVESTIGATION", color: "#55f1e5", message: "Avengers are isolating evidence across the pull request." },
-  awaiting_approval: { label: "AWAITING APPROVAL", color: "#ffb35a", message: "Findings are ready. Human authorization is required for GitHub writes." },
-  commented: { label: "COUNTER-STRIKE DEPLOYED", color: "#ff6f70", message: "JARVIS has confirmed the approved GitHub review comments." },
-  resolved: { label: "MISSION ACCOMPLISHED", color: "#7af0b3", message: "The verified thread is resolved. The incursion is contained." },
-  error: { label: "LINK INTERRUPTION", color: "#ff5f6d", message: "JARVIS could not complete this operation. Review the live intelligence feed." }
+  idle: { label: "EN ATTENTE", color: "#55b7ff", message: "JARVIS attend une mission." },
+  listening: { label: "À L’ÉCOUTE", color: "#55f1e5", message: "Canal de commande vocal et texte ouvert." },
+  investigating: { label: "ENQUÊTE NEXUS", color: "#55f1e5", message: "Les Avengers isolent les preuves dans la pull request." },
+  commented: { label: "CONTRE-ATTAQUE DÉPLOYÉE", color: "#ff6f70", message: "JARVIS a confirmé la publication des commentaires de revue." },
+  resolved: { label: "MISSION ACCOMPLIE", color: "#7af0b3", message: "Le fil vérifié est résolu. L’incursion est contenue." },
+  error: { label: "INTERRUPTION DU LIEN", color: "#ff5f6d", message: "JARVIS n’a pas pu terminer l’opération. Consulte le journal." }
 };
 const AGENT_DEFAULTS = [
   ["Iron Man", "Diff Analyst"],
@@ -22,8 +21,7 @@ const el = (id) => document.getElementById(id);
 const ui = {
   canvas: el("jarvis-canvas"), phase: el("jarvis-phase"), message: el("jarvis-message"), link: el("link-status"), linkWrap: document.querySelector(".live-link-status"), linkReading: el("link-reading"), arc: el("arc-reading"),
   missionName: el("mission-name"), missionDetail: el("mission-detail"), missionPr: el("mission-pr-link"), agents: el("agent-activity"), badge: el("operation-badge"),
-  form: el("command-form"), input: el("command-input"), send: el("send-command"), mic: el("mic-button"), voice: el("voice-toggle"), hint: el("command-hint"), log: el("event-log"), clear: el("clear-log"),
-  dialog: el("approval-dialog"), approvalCopy: el("approval-copy"), approve: el("approve-command")
+  form: el("command-form"), input: el("command-input"), send: el("send-command"), mic: el("mic-button"), voice: el("voice-toggle"), hint: el("command-hint"), log: el("event-log"), clear: el("clear-log")
 };
 
 let report = null;
@@ -55,41 +53,45 @@ function setPhase(phase, message) {
   document.body.dataset.jarvisPhase = phase;
   ui.phase.textContent = detail.label;
   ui.message.textContent = message || detail.message;
-  ui.badge.textContent = phase.replaceAll("_", " ");
+  ui.badge.textContent = stateLabel(phase);
   ui.badge.dataset.state = phase;
   robot?.setState(phase, detail.color);
-  if (voiceEnabled && ["awaiting_approval", "commented", "resolved", "error"].includes(phase)) speak(message || detail.message);
+  if (voiceEnabled && ["commented", "resolved", "error"].includes(phase)) speak(message || detail.message);
+}
+
+function stateLabel(state) {
+  return ({ idle: "en attente", listening: "à l’écoute", investigating: "enquête", complete: "terminé", commented: "publié", resolved: "résolu", error: "erreur" }[state] || String(state || "en attente").replaceAll("_", " "));
 }
 
 function setRelayStatus(online) {
   relayOnline = online;
   ui.linkWrap.dataset.linkState = online ? "online" : "offline";
-  ui.link.textContent = online ? "JARVIS LOCAL LINK ONLINE" : "LOCAL LINK OFFLINE · CODEX HANDOFF READY";
-  ui.linkReading.textContent = online ? "ONLINE" : "OFFLINE";
-  ui.send.textContent = online ? "Send to JARVIS" : "Copy for Codex";
+  ui.link.textContent = online ? "LIEN LOCAL JARVIS EN LIGNE" : "LIEN LOCAL HORS LIGNE · RELAIS CODEX PRÊT";
+  ui.linkReading.textContent = online ? "EN LIGNE" : "HORS LIGNE";
+  ui.send.textContent = online ? "Envoyer à JARVIS" : "Copier pour Codex";
 }
 
 function renderReport(data) {
   report = data;
   const mission = data?.mission || {};
   const pr = data?.pullRequest || {};
-  ui.missionName.textContent = mission.label || "No active mission";
-  ui.missionDetail.textContent = mission.summary || "JARVIS has no public mission report yet.";
+  ui.missionName.textContent = mission.label || "Aucune mission active";
+  ui.missionDetail.textContent = mission.summary || "JARVIS n’a pas encore de rapport de mission public.";
   ui.missionPr.href = pr.url || "index.html";
-  ui.missionPr.textContent = pr.number ? `Open PR #${pr.number} ↗` : "Open Command Center ↗";
+  ui.missionPr.textContent = pr.number ? `Ouvrir la PR #${pr.number} ↗` : "Ouvrir le centre de commandement ↗";
   renderAgents(data?.agents || []);
   const live = data?.liveMonitor || {};
   if (!operation && live.phase && PHASES[live.phase]) setPhase(live.phase, live.lastAgentMessage);
 }
 
 function renderAgents(rawAgents) {
-  const agents = rawAgents.length ? rawAgents : AGENT_DEFAULTS.map(([name, role]) => ({ name, role, status: "idle", summary: "Standing by." }));
+  const agents = rawAgents.length ? rawAgents : AGENT_DEFAULTS.map(([name, role]) => ({ name, role, status: "idle", summary: "En attente." }));
   ui.agents.replaceChildren(...agents.map((agent) => {
     const node = el("activity-template").content.firstElementChild.cloneNode(true);
     node.querySelector("strong").textContent = agent.name;
-    node.querySelector("small").textContent = agent.summary || agent.role || "Standing by.";
+    node.querySelector("small").textContent = agent.summary || agent.role || "En attente.";
     const badge = node.querySelector(".badge");
-    badge.textContent = agent.status || "idle";
+    badge.textContent = stateLabel(agent.status);
     badge.dataset.state = agent.status || "idle";
     node.dataset.state = agent.status || "idle";
     return node;
@@ -99,9 +101,9 @@ function renderAgents(rawAgents) {
 async function loadPublicReport(silent = false) {
   try {
     const response = await fetch(`${PUBLIC_REPORT_URL}?t=${Date.now()}`, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Public report unavailable (${response.status})`);
+    if (!response.ok) throw new Error(`Rapport public indisponible (${response.status})`);
     renderReport(await response.json());
-    if (!silent) log("Public S.H.I.E.L.D. report synchronized.");
+    if (!silent) log("Rapport public du S.H.I.E.L.D. synchronisé.");
   } catch (error) {
     if (!silent) log(error.message, "error");
   }
@@ -115,7 +117,7 @@ async function checkRelay() {
     if (!operation) setPhase(report?.liveMonitor?.phase || report?.mission?.status || "idle");
   } catch {
     setRelayStatus(false);
-    if (!operation) setPhase("idle", "Local relay unavailable. Commands can be staged securely for Codex.");
+    if (!operation) setPhase("idle", "Relay local indisponible. La commande peut être copiée vers Codex.");
   }
 }
 
@@ -125,11 +127,11 @@ function commandFromInput(text) {
   const threadMatch = input.match(/(?:thread|fil)\s*(?:#|id )?([A-Za-z0-9_:-]+)/i);
   const prNumber = Number(prMatch?.[1] || report?.pullRequest?.number);
   const lower = input.toLowerCase();
-  if (/\b(status|remain|reste|remaining|what)\b/.test(lower)) return { type: "status", prNumber };
-  if (/\b(resolve|résous|resoudre|résoudre|verify)\b/.test(lower)) return threadMatch ? { type: "resolve", prNumber, threadId: threadMatch[1] } : { error: "Please provide the exact GitHub thread ID to resolve." };
+  if (/\b(status|statut|remain|reste|remaining|what)\b/.test(lower)) return { type: "status", prNumber };
+  if (/\b(resolve|résous|resoudre|résoudre|verify|vérifie)\b/.test(lower)) return threadMatch ? { type: "resolve", prNumber, threadId: threadMatch[1] } : { error: "Indique l’identifiant GitHub exact du fil à résoudre." };
   if (/\b(publish|post|publie|poster|comment)\b/.test(lower)) return { type: "publish", prNumber };
   if (/\b(investigate|analyse|analyze|enquête|enquete|review)\b/.test(lower)) return { type: "investigate", prNumber };
-  return { error: "I only understand investigate, publish, resolve, or status commands." };
+  return { error: "Je comprends uniquement les commandes enquête, publication, résolution ou statut." };
 }
 
 function displayCommand(command) {
@@ -141,19 +143,19 @@ function displayCommand(command) {
 
 function codexPrompt(command) {
   const base = displayCommand(command);
-  return `${base}\n\nRespecte AGENTS.md et JARVIS_PLAYBOOK.md. Utilise GitHub MCP pour toute lecture ou écriture. ${command.type === "investigate" ? "Délègue les analyses en lecture seule et ne publie aucun commentaire." : "Ne réalise aucune mutation sans confirmation explicite de l’opérateur."}`;
+  return `${base}\n\nRespecte AGENTS.md et JARVIS_PLAYBOOK.md. Utilise GitHub MCP pour toute lecture ou écriture. ${command.type === "investigate" ? "Délègue les analyses en lecture seule et ne publie aucun commentaire." : "L’opérateur a donné une autorisation permanente pour cette action structurée."}`;
 }
 
 async function copyFallback(command) {
   const prompt = codexPrompt(command);
   try {
     await navigator.clipboard.writeText(prompt);
-    log("Local link offline — secure command copied for Codex.", "warning");
-    setPhase("listening", "Command staged. Paste it into Codex to run the real MCP operation.");
+    log("Lien local indisponible : commande sécurisée copiée pour Codex.", "warning");
+    setPhase("listening", "Commande prête. Colle-la dans Codex pour exécuter l’opération MCP réelle.");
   } catch {
     ui.input.value = prompt;
     ui.input.select();
-    log("Copy permission unavailable. The Codex handoff prompt is selected in the input.", "warning");
+    log("Copie indisponible. La commande de relais Codex est sélectionnée dans le champ.", "warning");
   }
 }
 
@@ -161,57 +163,31 @@ async function submitCommand(command) {
   if (command.error) { log(command.error, "error"); setPhase("error", command.error); return; }
   if (command.type === "status") {
     await loadPublicReport();
-    const summary = report?.summary?.message || "No outstanding public mission data.";
+    const summary = report?.summary?.message || "Aucune donnée de mission publique supplémentaire.";
     log(summary); setPhase(report?.liveMonitor?.phase || report?.mission?.status || "idle", summary); return;
   }
   if (!relayOnline) return copyFallback(command);
 
-  setPhase(command.type === "investigate" ? "investigating" : "awaiting_approval", `JARVIS received: ${displayCommand(command)}`);
-  log(`Dispatching ${command.type} protocol to local JARVIS relay.`);
+  setPhase("investigating", `JARVIS a reçu : ${displayCommand(command)}`);
+  log(`Envoi du protocole ${command.type} au relay JARVIS local.`);
   try {
     const payload = { type: command.type, pullRequest: command.prNumber };
     if (command.type === "resolve") payload.threadId = command.threadId;
     if (command.type === "publish") {
       payload.findingIds = (report?.findings || []).map((finding, index) => finding.id || `finding-${index + 1}`);
-      if (!payload.findingIds.length) throw new Error("No public findings are available to publish. Investigate the PR first.");
+      if (!payload.findingIds.length) throw new Error("Aucun constat public à publier. Lance d’abord une enquête sur la PR.");
     }
     const response = await fetch(`${RELAY_ORIGIN}/v1/commands`, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
     const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error || `Relay rejected the command (${response.status})`);
-    operation = { id: result.operationId || result.id, command, awaitingApproval: Boolean(result.requiresApproval) };
-    if (!operation.id) throw new Error("Relay returned no operation id.");
-    if (operation.awaitingApproval || command.type !== "investigate") showApproval(operation);
-    else subscribeToOperation(operation.id);
-  } catch (error) {
-    operation = null;
-    log(error.message, "error"); setPhase("error", error.message);
-  }
-}
-
-function showApproval(op) {
-  operation = op;
-  setPhase("awaiting_approval", "Counter-strike prepared. Authorize JARVIS to make this GitHub change.");
-  ui.approvalCopy.textContent = `${displayCommand(op.command)} This changes GitHub only after you authorize it.`;
-  ui.dialog.showModal();
-}
-
-async function approveOperation() {
-  if (!operation?.id) return;
-  try {
-    const response = await fetch(`${RELAY_ORIGIN}/v1/commands/${encodeURIComponent(operation.id)}/approve`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ approve: true })
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error || "Authorization was rejected by the local relay.");
-    ui.dialog.close();
-    log("Human authorization recorded. JARVIS is executing the counter-strike.", "warning");
+    if (!response.ok) throw new Error(result.error || `Le relay a refusé la commande (${response.status})`);
+    operation = { id: result.operationId || result.id, command };
+    if (!operation.id) throw new Error("Le relay n’a pas renvoyé d’identifiant d’opération.");
     subscribeToOperation(operation.id);
   } catch (error) {
+    operation = null;
     log(error.message, "error"); setPhase("error", error.message);
   }
 }
@@ -223,20 +199,20 @@ function subscribeToOperation(id) {
     try { handleOperationEvent(JSON.parse(event.data)); } catch { handleOperationEvent({ message: event.data }); }
   };
   activeEventSource.onmessage = receiveEvent;
-  ["created", "approved", "phase", "agent", "orchestrator", "complete", "error"].forEach((type) => activeEventSource.addEventListener(type, receiveEvent));
+  ["created", "phase", "agent", "orchestrator", "complete", "error"].forEach((type) => activeEventSource.addEventListener(type, receiveEvent));
   activeEventSource.onerror = () => {
     activeEventSource?.close();
-    if (operation) log("Live event link closed; public mission report will continue to refresh.", "warning");
+    if (operation) log("Lien d’événements fermé ; le rapport public continuera à s’actualiser.", "warning");
   };
 }
 
 function handleOperationEvent(event) {
   const phase = event.phase || event.state;
   const message = event.message || event.detail || "JARVIS received an operation event.";
-  log(message, phase === "error" ? "error" : phase === "awaiting_approval" ? "warning" : "intel");
+  log(message, phase === "error" ? "error" : "intel");
   if (phase && PHASES[phase]) setPhase(phase, message);
   if (Array.isArray(event.agents)) renderAgents(event.agents);
-  if (["completed", "complete", "resolved", "commented", "error"].includes(event.type || phase)) {
+  if (["completed", "complete", "resolved", "commented", "idle", "error"].includes(event.type || phase)) {
     activeEventSource?.close(); activeEventSource = null; operation = null;
     loadPublicReport(true);
   }
@@ -248,7 +224,7 @@ function chooseQuickAction(type) {
     const open = (report?.threads || []).find((thread) => thread.status === "open");
     ui.input.value = open?.id ? `JARVIS, résous le thread ${open.id} après vérification.` : "JARVIS, résous le thread <THREAD_ID> après vérification.";
   } else if (type === "publish") ui.input.value = `JARVIS, publie les constats approuvés sur la PR #${pr}.`;
-  else if (type === "status") ui.input.value = "JARVIS, what remains before this pull request can merge?";
+  else if (type === "status") ui.input.value = "JARVIS, quel est le statut de la mission ?";
   else ui.input.value = `JARVIS, enquête sur la PR #${pr}.`;
   ui.input.focus();
 }
@@ -265,10 +241,15 @@ function setUpVoiceInput() {
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!Recognition) { ui.mic.hidden = true; return; }
   recognition = new Recognition(); recognition.lang = "fr-FR"; recognition.interimResults = false; recognition.maxAlternatives = 1;
-  recognition.onstart = () => { ui.mic.dataset.active = "true"; setPhase("listening", "JARVIS is listening."); };
+  recognition.onstart = () => { ui.mic.dataset.active = "true"; setPhase("listening", "JARVIS est à l’écoute."); };
   recognition.onend = () => { delete ui.mic.dataset.active; };
-  recognition.onerror = () => { log("Voice recognition is unavailable. Type your command instead.", "warning"); };
-  recognition.onresult = ({ results }) => { ui.input.value = results[0][0].transcript; log("Voice command transcribed. Review it, then send."); };
+  recognition.onerror = () => { log("La reconnaissance vocale est indisponible. Saisis la commande.", "warning"); };
+  recognition.onresult = ({ results }) => {
+    const transcript = results[0][0].transcript;
+    ui.input.value = transcript;
+    log("Commande vocale transcrite et envoyée à JARVIS.");
+    submitCommand(commandFromInput(transcript));
+  };
   ui.mic.addEventListener("click", () => recognition.start());
 }
 
@@ -303,13 +284,13 @@ function createRobot(canvas) {
   let state = "idle", stateColor = new THREE.Color("#55b7ff"), clock = new THREE.Clock();
   const setState = (next, hex) => { state = next; stateColor.set(hex); glow.color.copy(stateColor); key.color.copy(stateColor); particles.material.color.copy(stateColor); };
   const animate = () => {
-    const t = clock.getElapsedTime(); const scanning = state === "investigating"; const waiting = state === "awaiting_approval";
+    const t = clock.getElapsedTime(); const scanning = state === "investigating";
     root.rotation.y = Math.sin(t * .36) * .16;
     root.rotation.x = Math.sin(t * .42) * .035;
     root.position.y = Math.sin(t * .88) * .08;
     ringGroup.rotation.z += scanning ? .038 : .006;
     ringGroup.rotation.y = Math.sin(t * (scanning ? 2.2 : .7)) * .2;
-    const pulse = .75 + Math.sin(t * (waiting ? 2.3 : scanning ? 5 : 1.5)) * .2;
+    const pulse = .75 + Math.sin(t * (scanning ? 5 : 1.5)) * .2;
     core.scale.setScalar(pulse);
     glow.opacity = state === "error" ? .5 + Math.random() * .46 : .74 + Math.sin(t * 2) * .18;
     particles.rotation.y = t * .025;
@@ -324,12 +305,10 @@ function start() {
   ui.form.addEventListener("submit", (event) => { event.preventDefault(); submitCommand(commandFromInput(ui.input.value)); });
   document.querySelectorAll(".quick-action").forEach((button) => button.addEventListener("click", () => chooseQuickAction(button.dataset.command)));
   ui.clear.addEventListener("click", () => ui.log.replaceChildren());
-  ui.voice.addEventListener("click", () => { voiceEnabled = !voiceEnabled; ui.voice.setAttribute("aria-pressed", String(voiceEnabled)); ui.voice.dataset.active = String(voiceEnabled); if (voiceEnabled) speak("JARVIS voice channel enabled."); });
-  ui.approve.addEventListener("click", (event) => { event.preventDefault(); approveOperation(); });
-  ui.dialog.addEventListener("close", () => { if (ui.dialog.returnValue === "cancel" && operation?.awaitingApproval) { log("Counter-strike cancelled by operator.", "warning"); operation = null; setPhase("awaiting_approval", "Authorization cancelled. No GitHub change was made."); } });
+  ui.voice.addEventListener("click", () => { voiceEnabled = !voiceEnabled; ui.voice.setAttribute("aria-pressed", String(voiceEnabled)); ui.voice.dataset.active = String(voiceEnabled); if (voiceEnabled) speak("Canal vocal JARVIS activé."); });
   setUpVoiceInput(); loadPublicReport(true); checkRelay();
   setInterval(() => { loadPublicReport(true); checkRelay(); }, POLL_INTERVAL);
-  log("JARVIS Live Monitor initialized.");
+  log("JARVIS Live Monitor initialisé.");
 }
 
 start();

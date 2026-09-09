@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="JARVIS Live Monitor — a local command link for evidence-backed pull request investigations." />
+    <meta name="description" content="JARVIS Live Monitor — commande locale pour les enquêtes de pull request fondées sur des preuves." />
     <title>JARVIS · Live Monitor</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body class="live-body">
     <main class="shell live-shell">
       <header class="topbar live-topbar">
-        <a class="brand live-brand" href="index.html" aria-label="Return to JARVIS Command Center">
+        <a class="brand live-brand" href="index.html" aria-label="Retour au centre de commandement JARVIS">
           <span class="brand-mark" aria-hidden="true">⌬</span>
           <span>
             <span class="eyebrow">S.H.I.E.L.D. // PROJECT INFINITY</span>
@@ -19,36 +19,36 @@
         </a>
         <div class="live-link-status" data-link-state="checking" aria-live="polite">
           <span class="pulse"></span>
-          <span id="link-status">CHECKING LOCAL LINK</span>
+          <span id="link-status">VÉRIFICATION DU LIEN LOCAL</span>
         </div>
       </header>
 
-      <section class="live-layout" aria-label="JARVIS live command interface">
-        <section class="jarvis-stage panel" aria-label="Animated JARVIS status display">
-          <canvas id="jarvis-canvas" aria-label="Animated original JARVIS robotic interface"></canvas>
+      <section class="live-layout" aria-label="Interface de commande JARVIS en direct">
+        <section class="jarvis-stage panel" aria-label="Affichage animé de l’état de JARVIS">
+          <canvas id="jarvis-canvas" aria-label="Interface robotique JARVIS originale animée"></canvas>
           <div class="stage-hud">
-            <p class="eyebrow">CURRENT PROTOCOL</p>
-            <h1 id="jarvis-phase">STANDING BY</h1>
-            <p id="jarvis-message">Checking the local command link.</p>
+            <p class="eyebrow">PROTOCOLE ACTUEL</p>
+            <h1 id="jarvis-phase">EN ATTENTE</h1>
+            <p id="jarvis-message">Vérification du lien de commande local.</p>
           </div>
           <div class="scan-readout" aria-hidden="true">
             <span>ARC // <b id="arc-reading">61%</b></span>
-            <span>LINK // <b id="link-reading">CHECK</b></span>
+            <span>LIEN // <b id="link-reading">VÉRIF.</b></span>
           </div>
         </section>
 
         <aside class="live-sidebar">
           <section class="panel live-panel mission-brief">
-            <p class="eyebrow">ACTIVE MISSION</p>
-            <h2 id="mission-name">Loading mission intelligence</h2>
-            <p id="mission-detail">The public S.H.I.E.L.D. report remains available while JARVIS connects.</p>
-            <a id="mission-pr-link" href="index.html">Open Command Center ↗</a>
+            <p class="eyebrow">MISSION ACTIVE</p>
+            <h2 id="mission-name">Chargement des renseignements</h2>
+            <p id="mission-detail">Le rapport public du S.H.I.E.L.D. reste disponible pendant la connexion de JARVIS.</p>
+            <a id="mission-pr-link" href="index.html">Ouvrir le centre de commandement ↗</a>
           </section>
 
           <section class="panel live-panel agent-status">
             <div class="live-section-title">
-              <div><p class="eyebrow">AVENGERS ASSEMBLE</p><h2>Agent deployment</h2></div>
-              <span id="operation-badge" class="badge" data-state="idle">idle</span>
+              <div><p class="eyebrow">AVENGERS, RASSEMBLEMENT</p><h2>Déploiement des agents</h2></div>
+              <span id="operation-badge" class="badge" data-state="idle">en attente</span>
             </div>
             <ul id="agent-activity" class="agent-activity" aria-live="polite"></ul>
           </section>
@@ -58,47 +58,35 @@
       <section class="console-grid">
         <section class="panel command-console" aria-labelledby="command-title">
           <div class="live-section-title">
-            <div><p class="eyebrow">VOICE / TEXT INTERFACE</p><h2 id="command-title">Speak to JARVIS</h2></div>
-            <button id="voice-toggle" class="icon-button" type="button" aria-pressed="false" title="Toggle JARVIS voice responses">◉ Voice</button>
+            <div><p class="eyebrow">INTERFACE VOCALE / TEXTE</p><h2 id="command-title">Parler à JARVIS</h2></div>
+            <button id="voice-toggle" class="icon-button" type="button" aria-pressed="false" title="Activer ou désactiver les réponses vocales de JARVIS">◉ Voix</button>
           </div>
           <form id="command-form" class="command-form">
-            <label class="sr-only" for="command-input">Command JARVIS</label>
+            <label class="sr-only" for="command-input">Commander JARVIS</label>
             <textarea id="command-input" rows="3" maxlength="500" placeholder="JARVIS, analyse la PR #1."></textarea>
             <div class="command-controls">
-              <button id="mic-button" class="secondary-button" type="button" title="Dictate a command">◎ Dictate</button>
-              <button id="send-command" type="submit">Send to JARVIS</button>
+              <button id="mic-button" class="secondary-button" type="button" title="Dicter une commande">◎ Dicter</button>
+              <button id="send-command" type="submit">Envoyer à JARVIS</button>
             </div>
           </form>
-          <p id="command-hint" class="command-hint">Only investigate, publish and resolve commands are accepted. GitHub writes always require approval.</p>
-          <div class="quick-actions" aria-label="Guided commands">
-            <button type="button" class="quick-action" data-command="investigate">Investigate PR</button>
-            <button type="button" class="quick-action" data-command="publish">Publish approved findings</button>
-            <button type="button" class="quick-action" data-command="resolve">Verify &amp; resolve thread</button>
-            <button type="button" class="quick-action" data-command="status">What remains?</button>
+          <p id="command-hint" class="command-hint">Les commandes acceptées sont : enquête, publication, résolution et statut. JARVIS possède une autorisation permanente limitée à ces actions.</p>
+          <div class="quick-actions" aria-label="Commandes guidées">
+            <button type="button" class="quick-action" data-command="investigate">Enquêter sur la PR</button>
+            <button type="button" class="quick-action" data-command="publish">Publier les constats</button>
+            <button type="button" class="quick-action" data-command="resolve">Vérifier et résoudre un fil</button>
+            <button type="button" class="quick-action" data-command="status">Que reste-t-il ?</button>
           </div>
         </section>
 
         <section class="panel event-console" aria-labelledby="event-title">
           <div class="live-section-title">
-            <div><p class="eyebrow">LIVE INTELLIGENCE FEED</p><h2 id="event-title">Operation log</h2></div>
-            <button id="clear-log" class="text-button" type="button">Clear</button>
+            <div><p class="eyebrow">FLUX DE RENSEIGNEMENTS EN DIRECT</p><h2 id="event-title">Journal des opérations</h2></div>
+            <button id="clear-log" class="text-button" type="button">Effacer</button>
           </div>
           <ol id="event-log" class="event-log" aria-live="polite"></ol>
         </section>
       </section>
     </main>
-
-    <dialog id="approval-dialog" class="approval-dialog" aria-labelledby="approval-title">
-      <form method="dialog">
-        <p class="eyebrow">HUMAN AUTHORIZATION REQUIRED</p>
-        <h2 id="approval-title">Authorize counter-strike?</h2>
-        <p id="approval-copy">JARVIS will make a GitHub change only after your approval.</p>
-        <div class="dialog-actions">
-          <button id="cancel-approval" class="secondary-button" value="cancel">Cancel</button>
-          <button id="approve-command" value="approve">Authorize JARVIS</button>
-        </div>
-      </form>
-    </dialog>
 
     <template id="activity-template">
       <li><span class="agent-orb"></span><span><strong></strong><small></small></span><span class="badge"></span></li>

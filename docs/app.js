@@ -25,8 +25,12 @@ const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, (character)
 }[character]));
 
 function formatDate(value) {
-  if (!value) return "Unknown time";
-  return new Intl.DateTimeFormat("en", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+  if (!value) return "Heure inconnue";
+  return new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+}
+
+function stateLabel(state) {
+  return ({ idle: "en attente", investigating: "enquête", complete: "terminé", commented: "publié", resolved: "résolu", open: "ouvert", error: "erreur" }[state] || state || "inconnu");
 }
 
 function setHtml(target, html) {
@@ -51,7 +55,7 @@ function renderReport(report) {
   elements.open.textContent = summary.openThreads ?? 0;
   const total = (summary.resolvedThreads ?? 0) + (summary.openThreads ?? 0);
   elements.meter.style.width = `${total ? Math.round(((summary.resolvedThreads ?? 0) / total) * 100) : 0}%`;
-  elements.updatedAt.textContent = `Last intelligence: ${formatDate(report.updatedAt)}`;
+  elements.updatedAt.textContent = `Dernier renseignement : ${formatDate(report.updatedAt)}`;
 
   renderTimeline(report.timeline || []);
   renderAgents(report.agents || []);
@@ -72,7 +76,7 @@ function renderAgents(agents) {
   if (!agents.length) return renderEmpty(elements.agents);
   setHtml(elements.agents, agents.map((agent) => `
     <article class="agent-card panel">
-      <header><div><p class="eyebrow">${escapeHtml(agent.role)}</p><h3>${escapeHtml(agent.name)}</h3></div><span class="badge" data-state="${escapeHtml(agent.status)}">${escapeHtml(agent.status)}</span></header>
+      <header><div><p class="eyebrow">${escapeHtml(agent.role)}</p><h3>${escapeHtml(agent.name)}</h3></div><span class="badge" data-state="${escapeHtml(agent.status)}">${escapeHtml(stateLabel(agent.status))}</span></header>
       <p>${escapeHtml(agent.summary)}</p>
     </article>`).join(""));
 }
@@ -84,8 +88,8 @@ function renderFindings(findings) {
     return `<article class="finding-card panel" data-hero="${escapeHtml(finding.hero)}">
       <header><div><p class="eyebrow">${escapeHtml(finding.hero)}</p><h3>${escapeHtml(finding.title)}</h3></div><span class="badge severity-${escapeHtml(finding.severity)}">${escapeHtml(finding.severity)}</span></header>
       <p class="finding-body">${escapeHtml(finding.description)}</p>
-      ${evidence ? `<div class="evidence"><strong>Evidence</strong><p>${escapeHtml(evidence.detail)}</p><a href="${escapeHtml(evidence.url)}" target="_blank" rel="noreferrer">Open source ↗</a></div>` : ""}
-      <footer><span>${escapeHtml(finding.file || "Repository-wide")} ${finding.line ? `:${finding.line}` : ""}</span><span>${Math.round((finding.confidence || 0) * 100)}% confidence</span></footer>
+      ${evidence ? `<div class="evidence"><strong>Preuve</strong><p>${escapeHtml(evidence.detail)}</p><a href="${escapeHtml(evidence.url)}" target="_blank" rel="noreferrer">Ouvrir la source ↗</a></div>` : ""}
+      <footer><span>${escapeHtml(finding.file || "Tout le dépôt")} ${finding.line ? `:${finding.line}` : ""}</span><span>${Math.round((finding.confidence || 0) * 100)} % de confiance</span></footer>
     </article>`;
   }).join(""));
 }
@@ -94,20 +98,20 @@ function renderThreads(threads) {
   if (!threads.length) return renderEmpty(elements.threads);
   setHtml(elements.threads, threads.map((thread) => `
     <article class="thread-row">
-      <div><h3>${escapeHtml(thread.title)}</h3><p class="thread-detail">${escapeHtml(thread.detail || "No additional detail.")}</p></div>
-      <div><span class="badge" data-state="${escapeHtml(thread.status)}">${escapeHtml(thread.status)}</span>${thread.url ? `<p><a href="${escapeHtml(thread.url)}" target="_blank" rel="noreferrer">Open thread ↗</a></p>` : ""}</div>
+      <div><h3>${escapeHtml(thread.title)}</h3><p class="thread-detail">${escapeHtml(thread.detail || "Aucun détail supplémentaire.")}</p></div>
+      <div><span class="badge" data-state="${escapeHtml(thread.status)}">${escapeHtml(stateLabel(thread.status))}</span>${thread.url ? `<p><a href="${escapeHtml(thread.url)}" target="_blank" rel="noreferrer">Ouvrir le fil ↗</a></p>` : ""}</div>
     </article>`).join(""));
 }
 
 async function fetchReport() {
-  elements.sourceStatus.textContent = "SYNCING MISSION FEED";
+  elements.sourceStatus.textContent = "SYNCHRONISATION DU FLUX DE MISSION";
   try {
     const { report, source } = await fetchMissionReport();
     renderReport(report);
     elements.sourceStatus.textContent = sourceLabel(source);
   } catch (error) {
-    elements.sourceStatus.textContent = "MISSION FEED OFFLINE";
-    elements.missionSummary.textContent = `Unable to load the mission report: ${error?.message ?? "unknown error"}`;
+    elements.sourceStatus.textContent = "FLUX DE MISSION HORS LIGNE";
+    elements.missionSummary.textContent = `Impossible de charger le rapport de mission : ${error?.message ?? "erreur inconnue"}`;
   }
 }
 

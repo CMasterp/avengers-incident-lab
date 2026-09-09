@@ -4,7 +4,7 @@ import { spawn } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
-import { validateApproval, validateCommand, validateWorkerResult, CommandValidationError } from "../schemas/commands.js";
+import { validateCommand, validateWorkerResult, CommandValidationError } from "../schemas/commands.js";
 
 const MAX_BODY_BYTES = 16 * 1024;
 const MAX_OUTPUT_BYTES = 160 * 1024;
@@ -148,7 +148,7 @@ function orchestratorPrompt(command, workers) {
   const workerSummary = workers.map(({ worker, result }) => ({ agent: worker.id, result })).map((entry) => JSON.stringify(entry)).join("\n");
   const writeInstruction = command.type === "investigate"
     ? "Do not post review comments, resolve threads, or change application code. You may use GitHub MCP to update only docs/mission-report.json on main with public, evidence-backed findings and liveMonitor state after the investigation."
-    : "The operator explicitly approved this one action. Use GitHub MCP only for the requested action, verify GitHub confirms it, then update docs/mission-report.json on main with the confirmed public state. Do not do any other mutation.";
+    : "The operator granted JARVIS a persistent, scoped authorization for this requested action. Use GitHub MCP only for the requested action, verify GitHub confirms it, then update docs/mission-report.json on main with the confirmed public state. Do not do any other mutation.";
   return [
     "You are JARVIS Orchestrator for CMasterp/avengers-incident-lab.",
     writeInstruction,
@@ -175,9 +175,9 @@ export function createJarvisRelay({ port = DEFAULT_PORT, host = "127.0.0.1", mod
     operation.phase = "investigating";
     event(operation, "phase", "Avengers assembled. JARVIS is coordinating the mission.");
     if (mode === "mock") {
-      for (const worker of workerDefinitions) event(operation, "agent", `${worker.name} completed a read-only evidence scan.`, { agent: worker.id, status: "complete" });
-      operation.phase = operation.command.type === "investigate" ? "awaiting_approval" : "completed";
-      event(operation, "complete", operation.command.type === "investigate" ? "Threats isolated. Human approval is required before GitHub writes." : "Approved command completed in mock mode.");
+      for (const worker of workerDefinitions) event(operation, "agent", `${worker.name} a terminé son analyse des preuves en lecture seule.`, { agent: worker.id, status: "complete" });
+      operation.phase = operation.command.type === "publish" ? "commented" : operation.command.type === "resolve" ? "resolved" : "idle";
+      event(operation, "complete", operation.command.type === "investigate" ? "Menaces isolées. JARVIS est prêt pour la prochaine commande." : "Commande exécutée en mode démonstration.");
       return;
     }
 
@@ -198,7 +198,7 @@ export function createJarvisRelay({ port = DEFAULT_PORT, host = "127.0.0.1", mod
         env: { ...process.env, JARVIS_ROLE: "orchestrator" }
       });
       const result = parseLastJson(output);
-      operation.phase = operation.command.type === "investigate" ? "awaiting_approval" : "completed";
+      operation.phase = operation.command.type === "publish" ? "commented" : operation.command.type === "resolve" ? "resolved" : "idle";
       event(operation, "complete", result.message ?? "JARVIS completed the operation.", { status: result.status ?? operation.phase });
     } catch (error) {
       operation.phase = "error";
@@ -207,10 +207,10 @@ export function createJarvisRelay({ port = DEFAULT_PORT, host = "127.0.0.1", mod
   }
 
   function createOperation(command) {
-    const operation = { id: randomUUID(), command, phase: ["publish", "resolve"].includes(command.type) ? "awaiting_approval" : "queued", events: [], clients: new Set() };
+    const operation = { id: randomUUID(), command, phase: "queued", events: [], clients: new Set() };
     operations.set(operation.id, operation);
-    event(operation, "created", command.type === "investigate" ? "Investigation command accepted." : "Command staged. Explicit approval is required before a GitHub write.");
-    if (command.type === "investigate") queueMicrotask(() => execute(operation));
+    event(operation, "created", command.type === "investigate" ? "Commande d’enquête acceptée." : "Commande acceptée. JARVIS dispose de l’autorisation permanente requise.");
+    queueMicrotask(() => execute(operation));
     return operation;
   }
 
@@ -227,21 +227,7 @@ export function createJarvisRelay({ port = DEFAULT_PORT, host = "127.0.0.1", mod
       try {
         const command = validateCommand(await readJson(req));
         const operation = createOperation(command);
-        writeJson(res, 202, { id: operation.id, phase: operation.phase, requiresApproval: command.type !== "investigate" });
-      } catch (error) { writeJson(res, 400, { error: publicError(error) }); }
-      return;
-    }
-    const approval = /^\/v1\/commands\/([0-9a-f-]{36})\/approve$/.exec(url.pathname);
-    if (req.method === "POST" && approval) {
-      try {
-        validateApproval(await readJson(req));
-        const operation = operations.get(approval[1]);
-        if (!operation) return writeJson(res, 404, { error: "Operation not found." });
-        if (!["publish", "resolve"].includes(operation.command.type) || operation.phase !== "awaiting_approval") return writeJson(res, 409, { error: "This operation cannot be approved." });
-        operation.phase = "queued";
-        event(operation, "approved", "Operator approval received. JARVIS may execute the requested GitHub mutation.");
-        queueMicrotask(() => execute(operation));
-        writeJson(res, 202, { id: operation.id, phase: operation.phase });
+        writeJson(res, 202, { id: operation.id, phase: operation.phase, requiresApproval: false });
       } catch (error) { writeJson(res, 400, { error: publicError(error) }); }
       return;
     }

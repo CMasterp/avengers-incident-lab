@@ -1,18 +1,18 @@
-# JARVIS playbook
+# Playbook JARVIS
 
-## Operator commands
+## Commandes opérateur
 
 ```text
 JARVIS, enquête sur la PR #<id>.
-JARVIS, publie les constats approuvés sur la PR #<id>.
+JARVIS, publie les constats sur la PR #<id>.
 JARVIS, résous le thread <id> après vérification.
 ```
 
-The local Jarvis Relay accepts only these structured intents: `investigate` (PR number), `publish` (PR number), and `resolve` (thread ID). The dashboard-only `status` request refreshes the public report and never reaches the relay. The relay must never forward arbitrary browser text as a shell command or MCP call. `publish` and `resolve` always stop at an approval gate before any GitHub write.
+Le relay JARVIS local accepte uniquement ces intentions structurées : `investigate` (numéro de PR), `publish` (numéro de PR) et `resolve` (identifiant de fil). La demande `status` ne fait qu’actualiser le rapport public et n’atteint jamais le relay. Le relay ne doit jamais transmettre du texte navigateur arbitraire comme commande shell ou appel MCP. L’opérateur a donné à JARVIS une autorisation permanente limitée aux actions structurées demandées.
 
-## Specialist response contract
+## Contrat de réponse des spécialistes
 
-Return a JSON object containing a `findings` array. A finding has this shape:
+Retourne un objet JSON contenant un tableau `findings`. Un constat a cette forme :
 
 ```json
 {
@@ -32,15 +32,15 @@ Return a JSON object containing a `findings` array. A finding has this shape:
 }
 ```
 
-Do not return a finding below `0.5` confidence. If evidence is unavailable, return an empty array and explain the gap to JARVIS.
+Ne retourne pas de constat sous `0.5` de confiance. Si aucune preuve n’est disponible, retourne un tableau vide et explique le manque à JARVIS.
 
-## Orchestrator workflow
+## Flux de l’orchestrateur
 
-1. Confirm the target PR and put both `mission.status` and `liveMonitor.phase` in `investigating` state. Add a concise public event identifying the operation, never its raw prompt.
-2. Launch the three specialists in parallel with the PR coordinate and response contract.
-3. Merge evidence-backed findings, retaining their source URLs and confidence.
-4. Write a report in `awaiting_approval` state with a `pendingActions` entry; do not create GitHub comments.
-5. On an explicit publish command and local approval, post approved comments via GitHub MCP and record their actual thread IDs and URLs. Only then set the phase to `commented`.
-6. On an explicit resolution command and local approval, re-read the relevant diff and thread. Resolve only the requested thread after confirmation, then set the phase to `resolved`.
-7. On any failure, set the public phase to `error` with a short safe message; do not claim success.
-8. Commit the updated public-safe report to `main` via GitHub MCP so GitHub Pages can refresh.
+1. Confirme la PR cible et place `mission.status` et `liveMonitor.phase` à `investigating`. Ajoute un événement public concis identifiant l’opération, jamais son prompt brut.
+2. Lance les trois spécialistes en parallèle avec la PR et leur contrat de réponse.
+3. Fusionne les constats étayés par des preuves, en conservant URL source et confiance.
+4. Écris un rapport avec `phase: idle` : ne crée aucun commentaire tant qu’une commande `publish` n’a pas été demandée.
+5. Sur une commande explicite `publish`, publie les commentaires via GitHub MCP et enregistre leurs identifiants et URL de fil réels. Mets alors la phase à `commented`.
+6. Sur une commande explicite `resolve`, relis le diff et le fil pertinent, puis résous uniquement le fil demandé. Mets alors la phase à `resolved`.
+7. En cas d’échec, mets la phase publique à `error` avec un message court et sûr, sans prétendre au succès.
+8. Committe le rapport publiable mis à jour sur `main` via GitHub MCP pour actualiser GitHub Pages.

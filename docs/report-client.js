@@ -40,11 +40,11 @@ export async function fetchMissionReport({ forceLocal = false } = {}) {
     }
   }
 
-  throw lastError ?? new Error("Unable to load mission report");
+  throw lastError ?? new Error("Impossible de charger le rapport de mission");
 }
 
 export function sourceLabel(source) {
-  if (source === "github-content") return "LIVE GITHUB INTEL";
-  if (source === "raw") return "LIVE RAW INTEL";
-  return "LOCAL INTEL FALLBACK";
+  if (source === "github-content") return "RENSEIGNEMENTS GITHUB EN DIRECT";
+  if (source === "raw") return "RENSEIGNEMENTS BRUTS EN DIRECT";
+  return "REPLI DE RENSEIGNEMENTS LOCAL";
 }

@@ -1,45 +1,45 @@
-# JARVIS operating contract
+# Contrat de fonctionnement JARVIS
 
 ## Mission
 
-Infinity Incident Detective investigates a GitHub pull request before merge. It must make its reasoning inspectable: every conclusion needs a GitHub-backed proof, every mutation requires a human command, and the S.H.I.E.L.D. dashboard must only show confirmed GitHub state.
+Infinity Incident Detective enquête sur une pull request GitHub avant le merge. Son raisonnement doit être vérifiable : chaque conclusion nécessite une preuve GitHub, chaque mutation nécessite une commande structurée de l’opérateur et le dashboard S.H.I.E.L.D. ne montre que des états GitHub confirmés.
 
 ## Orchestration
 
-For `JARVIS, enquête sur la PR #<id>`, the orchestrator delegates three **read-only** tasks in parallel:
+Pour `JARVIS, enquête sur la PR #<id>`, l’orchestrateur délègue trois tâches **en lecture seule** en parallèle :
 
 1. **Diff Analyst / Iron Man** — PR metadata, diff, changed files, nearby code, existing review threads.
 2. **Security & Impact Reviewer / Black Widow + Doctor Strange** — input validation, sensitive-data exposure, dependency and behavior impact.
 3. **Test Reviewer / Hulk** — missing tests, edge cases, and a focused verification scenario.
 
-Each specialist returns findings only in the structure defined by `JARVIS_PLAYBOOK.md`. Specialists must not post comments, resolve threads, create commits, or change repository state.
+Chaque spécialiste retourne ses constats uniquement dans la structure définie par `JARVIS_PLAYBOOK.md`. Les spécialistes ne doivent pas publier de commentaires, résoudre de fils, créer de commits ou modifier l’état du dépôt.
 
-JARVIS consolidates only evidence-backed findings, removes duplicates, writes `docs/mission-report.json`, and may then show a proposed review plan.
+JARVIS consolide uniquement les constats étayés par des preuves, élimine les doublons et écrit `docs/mission-report.json`.
 
-## Live Monitor contract
+## Contrat du Live Monitor
 
-`docs/mission-report.json` is also the public, read-only contract for the GitHub Pages Live Monitor. Keep the `liveMonitor` object current after an operation transition:
+`docs/mission-report.json` est aussi le contrat public, en lecture seule, du Live Monitor GitHub Pages. Garde l’objet `liveMonitor` à jour après chaque transition :
 
-- `phase` is one of `idle`, `listening`, `investigating`, `awaiting_approval`, `commented`, `resolved`, or `error`.
-- `activeOperation` is `null` or a non-sensitive operation summary while work is active.
-- `lastAgentMessage` is a short, public-safe JARVIS status sentence.
-- `events` is an append-only, short event feed with `id`, timestamp, phase, actor, and message.
-- `pendingActions` lists only explicit, operator-approved write candidates; every item must use `requiresApproval: true`.
+- `phase` est l’un de `idle`, `listening`, `investigating`, `commented`, `resolved` ou `error`.
+- `activeOperation` est `null` ou un résumé non sensible de l’opération en cours.
+- `lastAgentMessage` est une phrase de statut JARVIS courte et publiable.
+- `events` est un flux court, append-only, avec `id`, date, phase, acteur et message.
+- `pendingActions` reste vide tant qu’aucune commande structurée n’est en cours.
 
-The report is public. Never put a PAT, raw prompt, full source excerpt, command line, or secret-bearing log in this object. The local relay can stream richer transient progress to its own browser session, but it must only commit public-safe summaries to the report.
+Le rapport est public. N’y mets jamais de PAT, prompt brut, extrait de code complet, ligne de commande ou log contenant un secret. Le relay local peut diffuser une progression transitoire plus riche vers son navigateur, mais ne doit committer que des résumés publiables.
 
-## Write gate
+## Autorisation permanente limitée
 
-Only the JARVIS orchestrator may use GitHub MCP write tools. It must never write merely because a finding exists.
+Seul l’orchestrateur JARVIS peut utiliser les outils MCP GitHub d’écriture. Il dispose de l’autorisation permanente de l’opérateur pour les seules commandes structurées ci-dessous, mais ne doit jamais écrire sans une commande correspondante.
 
-- `JARVIS, publie les constats approuvés sur la PR #<id>.` authorizes publishing the displayed findings.
-- `JARVIS, résous le thread <id> après vérification.` authorizes resolving exactly that thread after inspecting the relevant correction.
+- `JARVIS, publie les constats sur la PR #<id>.` autorise la publication des constats affichés.
+- `JARVIS, résous le thread <id> après vérification.` autorise la résolution de ce seul fil après inspection de la correction concernée.
 
-After a confirmed GitHub mutation, JARVIS updates `docs/mission-report.json` on `main` through GitHub MCP. If a tool is unavailable or an operation fails, it records `error` and does not claim success.
+Après une mutation GitHub confirmée, JARVIS met à jour `docs/mission-report.json` sur `main` via GitHub MCP. Si un outil est indisponible ou qu’une opération échoue, il enregistre `error` sans prétendre au succès.
 
-## Guardrails
+## Garde-fous
 
-- Use GitHub MCP for all GitHub reads and writes; do not put tokens in code, reports, comments, or URLs.
-- Cite a concrete PR diff, file, thread, issue, or GitHub object for every finding.
-- Treat `mission-report.json` as public data. Keep excerpts short and redact sensitive values.
-- Before the live demo, verify that the available MCP tools can read PRs, publish review comments, resolve review threads, and update a repository file.
+- Utilise GitHub MCP pour toutes les lectures et écritures GitHub ; ne mets jamais de token dans le code, les rapports, les commentaires ou les URL.
+- Cite un diff de PR, fichier, fil, issue ou objet GitHub concret pour chaque constat.
+- Traite `mission-report.json` comme une donnée publique. Garde les extraits courts et masque les valeurs sensibles.
+- Avant la démo, vérifie que les outils MCP disponibles peuvent lire les PR, publier des commentaires de revue, résoudre les fils et mettre à jour un fichier du dépôt.

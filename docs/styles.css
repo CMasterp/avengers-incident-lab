@@ -139,16 +139,10 @@ button { cursor: pointer; border: 1px solid var(--cyan); border-radius: 0.45rem;
 .event-log time { color: var(--cyan); font: 700 .66rem ui-monospace, SFMono-Regular, Menlo, monospace; }
 .event-log li[data-state="error"] span { color: var(--red); }
 .event-log li[data-state="warning"] span { color: var(--orange); }
-.approval-dialog { width: min(92vw, 32rem); padding: 1.35rem; border: 1px solid rgba(255,179,90,.55); border-radius: 1rem; color: var(--text); background: #0d1725; box-shadow: 0 1.5rem 5rem rgba(0,0,0,.65); }
-.approval-dialog::backdrop { background: rgba(1, 5, 12, .74); backdrop-filter: blur(4px); }
-.approval-dialog h2 { margin: .45rem 0 .6rem; }
-.approval-dialog p:not(.eyebrow) { color: var(--muted); line-height: 1.5; }
-.dialog-actions { display: flex; justify-content: flex-end; gap: .65rem; margin-top: 1.2rem; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
-body[data-jarvis-phase="awaiting_approval"] .jarvis-stage { box-shadow: inset 0 0 3rem rgba(255, 179, 90, .11); }
 body[data-jarvis-phase="resolved"] .jarvis-stage { box-shadow: inset 0 0 3rem rgba(122, 240, 179, .12); }
 body[data-jarvis-phase="error"] .jarvis-stage { animation: live-glitch .22s 3; }
 @keyframes live-pulse { to { opacity: .35; transform: scale(1.45); } }
 @keyframes live-glitch { 25% { transform: translateX(2px); } 50% { transform: translateX(-3px); filter: hue-rotate(50deg); } 75% { transform: translateX(1px); } }
 @media (max-width: 840px) { .live-layout, .console-grid { grid-template-columns: 1fr; } .jarvis-stage, #jarvis-canvas { min-height: 25rem; height: 25rem; } .live-sidebar { grid-template-columns: 1fr 1.3fr; } }
-@media (max-width: 570px) { .live-sidebar { grid-template-columns: 1fr; } .jarvis-stage, #jarvis-canvas { min-height: 22rem; height: 22rem; } .stage-hud { bottom: 1.25rem; } .scan-readout { top: 1rem; right: 1rem; } .command-controls { align-items: stretch; flex-direction: column; } .dialog-actions { flex-direction: column-reverse; } }
+@media (max-width: 570px) { .live-sidebar { grid-template-columns: 1fr; } .jarvis-stage, #jarvis-canvas { min-height: 22rem; height: 22rem; } .stage-hud { bottom: 1.25rem; } .scan-readout { top: 1rem; right: 1rem; } .command-controls { align-items: stretch; flex-direction: column; } }
