@@ -6,6 +6,35 @@
     "label": "Nexus auth refactor contained",
     "summary": "Three evidence-backed threats are ready for operator approval. JARVIS has not posted any review comment."
   },
+  "liveMonitor": {
+    "phase": "awaiting_approval",
+    "activeOperation": null,
+    "lastAgentMessage": "Three threats isolated. Operator approval is required before I publish a counter-strike.",
+    "events": [
+      {
+        "id": "event-systems-online",
+        "at": "2026-09-09T15:30:00.000Z",
+        "phase": "idle",
+        "actor": "JARVIS",
+        "message": "S.H.I.E.L.D. systems online. Live Monitor is standing by."
+      },
+      {
+        "id": "event-investigation-complete",
+        "at": "2026-09-09T16:10:00.000Z",
+        "phase": "awaiting_approval",
+        "actor": "JARVIS",
+        "message": "Three specialist reports were verified. No GitHub mutation has been made."
+      }
+    ],
+    "pendingActions": [
+      {
+        "id": "publish-pr-1",
+        "type": "publish",
+        "label": "Publish the three approved findings to PR #1",
+        "requiresApproval": true
+      }
+    ]
+  },
   "pullRequest": {
     "repository": "CMasterp/avengers-incident-lab",
     "number": 1,

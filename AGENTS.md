@@ -16,6 +16,18 @@ Each specialist returns findings only in the structure defined by `JARVIS_PLAYBO
 
 JARVIS consolidates only evidence-backed findings, removes duplicates, writes `docs/mission-report.json`, and may then show a proposed review plan.
 
+## Live Monitor contract
+
+`docs/mission-report.json` is also the public, read-only contract for the GitHub Pages Live Monitor. Keep the `liveMonitor` object current after an operation transition:
+
+- `phase` is one of `idle`, `listening`, `investigating`, `awaiting_approval`, `commented`, `resolved`, or `error`.
+- `activeOperation` is `null` or a non-sensitive operation summary while work is active.
+- `lastAgentMessage` is a short, public-safe JARVIS status sentence.
+- `events` is an append-only, short event feed with `id`, timestamp, phase, actor, and message.
+- `pendingActions` lists only explicit, operator-approved write candidates; every item must use `requiresApproval: true`.
+
+The report is public. Never put a PAT, raw prompt, full source excerpt, command line, or secret-bearing log in this object. The local relay can stream richer transient progress to its own browser session, but it must only commit public-safe summaries to the report.
+
 ## Write gate
 
 Only the JARVIS orchestrator may use GitHub MCP write tools. It must never write merely because a finding exists.

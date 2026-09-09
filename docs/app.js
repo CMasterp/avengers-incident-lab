@@ -1,7 +1,4 @@
-const repository = "CMasterp/avengers-incident-lab";
-const apiReportUrl = `https://api.github.com/repos/${repository}/contents/docs/mission-report.json?ref=main`;
-const rawReportUrl = `https://raw.githubusercontent.com/${repository}/main/docs/mission-report.json`;
-const localReportUrl = "./mission-report.json";
+import { fetchMissionReport, sourceLabel } from "./report-client.js";
 
 const elements = {
   sourceStatus: document.querySelector("#source-status"),
@@ -104,35 +101,14 @@ function renderThreads(threads) {
 
 async function fetchReport() {
   elements.sourceStatus.textContent = "SYNCING MISSION FEED";
-  const isLocalPreview = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
-  const sources = isLocalPreview
-    ? [{ url: localReportUrl, kind: "json" }]
-    : [
-        { url: apiReportUrl, kind: "github-content" },
-        { url: rawReportUrl, kind: "json" },
-        { url: localReportUrl, kind: "json" }
-      ];
-  let lastError;
-
-  for (const source of sources) {
-    try {
-      const separator = source.url.includes("?") ? "&" : "?";
-      const response = await fetch(`${source.url}${separator}cache=${Date.now()}`, { cache: "no-store" });
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const payload = await response.json();
-      const report = source.kind === "github-content"
-        ? JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(payload.content.replace(/\n/g, "")), (character) => character.charCodeAt(0))))
-        : payload;
-      renderReport(report);
-      elements.sourceStatus.textContent = source.kind === "github-content" ? "LIVE GITHUB INTEL" : "LOCAL INTEL FALLBACK";
-      return;
-    } catch (error) {
-      lastError = error;
-    }
+  try {
+    const { report, source } = await fetchMissionReport();
+    renderReport(report);
+    elements.sourceStatus.textContent = sourceLabel(source);
+  } catch (error) {
+    elements.sourceStatus.textContent = "MISSION FEED OFFLINE";
+    elements.missionSummary.textContent = `Unable to load the mission report: ${error?.message ?? "unknown error"}`;
   }
-
-  elements.sourceStatus.textContent = "MISSION FEED OFFLINE";
-  elements.missionSummary.textContent = `Unable to load the mission report: ${lastError?.message ?? "unknown error"}`;
 }
 
 elements.refresh.addEventListener("click", fetchReport);
