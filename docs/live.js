@@ -239,18 +239,50 @@ function speak(message) {
 
 function setUpVoiceInput() {
   const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!Recognition) { ui.mic.hidden = true; return; }
+  if (!Recognition) {
+    ui.mic.hidden = true;
+    log("La dictée n’est pas prise en charge par ce navigateur. Utilise Chrome récent pour activer le micro.", "warning");
+    return;
+  }
   recognition = new Recognition(); recognition.lang = "fr-FR"; recognition.interimResults = false; recognition.maxAlternatives = 1;
   recognition.onstart = () => { ui.mic.dataset.active = "true"; setPhase("listening", "JARVIS est à l’écoute."); };
   recognition.onend = () => { delete ui.mic.dataset.active; };
-  recognition.onerror = () => { log("La reconnaissance vocale est indisponible. Saisis la commande.", "warning"); };
+  recognition.onerror = ({ error }) => {
+    const messages = {
+      "not-allowed": "Accès au microphone refusé. Autorise le micro pour 127.0.0.1 dans Chrome, puis réessaie.",
+      "service-not-allowed": "Le service de reconnaissance vocale est bloqué par le navigateur.",
+      "audio-capture": "Aucun microphone utilisable n’a été détecté sur cet ordinateur.",
+      "network": "Le service de reconnaissance vocale ne peut pas être joint. Vérifie la connexion internet.",
+      "no-speech": "JARVIS n’a rien entendu. Réessaie en parlant après l’animation cyan.",
+      "aborted": "La dictée a été interrompue. Réessaie.",
+      "language-not-supported": "La reconnaissance vocale française n’est pas disponible dans ce navigateur."
+    };
+    const message = messages[error] || `La dictée a échoué (${error || "erreur inconnue"}).`;
+    log(message, "warning");
+    setPhase("error", message);
+  };
   recognition.onresult = ({ results }) => {
     const transcript = results[0][0].transcript;
     ui.input.value = transcript;
     log("Commande vocale transcrite et envoyée à JARVIS.");
     submitCommand(commandFromInput(transcript));
   };
-  ui.mic.addEventListener("click", () => recognition.start());
+  ui.mic.addEventListener("click", async () => {
+    try {
+      if (!navigator.mediaDevices?.getUserMedia) throw new Error("unsupported");
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach((track) => track.stop());
+      recognition.start();
+    } catch (error) {
+      const message = error?.name === "NotAllowedError"
+        ? "Accès au microphone refusé. Autorise le micro pour 127.0.0.1 dans Chrome, puis réessaie."
+        : error?.name === "NotFoundError"
+          ? "Aucun microphone utilisable n’a été détecté sur cet ordinateur."
+          : "Le microphone ne peut pas être initialisé par ce navigateur.";
+      log(message, "warning");
+      setPhase("error", message);
+    }
+  });
 }
 
 function createRobot(canvas) {
