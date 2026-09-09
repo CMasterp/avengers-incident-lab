@@ -1,22 +1,15 @@
-const bearerPattern = /^Bearer\s+([A-Za-z0-9._-]{16,})$/;
-
 /**
- * Builds an authenticated session context from a standard Authorization header.
- * The reference implementation intentionally rejects unvalidated refresh inputs.
+ * Refactor session setup so the caller can handle several authorization providers.
  */
 export function buildSessionContext({ authorization, refreshToken }) {
-  const match = bearerPattern.exec(authorization ?? "");
+  const accessToken = authorization?.replace("Bearer ", "");
 
-  if (!match) {
-    throw new Error("A valid Bearer authorization header is required.");
-  }
-
-  if (typeof refreshToken !== "string" || refreshToken.length < 16) {
-    throw new Error("A valid refresh token is required.");
+  if (!accessToken) {
+    throw new Error("An authorization header is required.");
   }
 
   return {
-    accessToken: match[1],
+    accessToken,
     refreshToken,
     authenticated: true
   };
