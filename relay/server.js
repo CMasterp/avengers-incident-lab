@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { validateApproval, validateCommand, validateWorkerResult, CommandValidationError } from "../schemas/commands.js";
@@ -93,6 +94,20 @@ function parseLastJson(output) {
   throw new Error("Codex did not return a machine-readable result.");
 }
 
+function loadLocalGitHubPat(repoRoot) {
+  if (process.env.GITHUB_PAT) return;
+  try {
+    const entry = readFileSync(resolve(repoRoot, ".env"), "utf8")
+      .split(/\r?\n/)
+      .find((line) => /^\s*GITHUB_PAT\s*=/.test(line));
+    if (!entry) return;
+    const value = entry.replace(/^\s*GITHUB_PAT\s*=\s*/, "").trim().replace(/^['"]|['"]$/g, "");
+    if (value) process.env.GITHUB_PAT = value;
+  } catch {
+    // Missing local configuration is reported only if a real Codex operation needs it.
+  }
+}
+
 function runProcess(command, args, { cwd, env }) {
   return new Promise((resolveProcess, rejectProcess) => {
     const child = spawn(command, args, { cwd, env, shell: false, stdio: ["ignore", "pipe", "pipe"] });
@@ -147,6 +162,7 @@ function orchestratorPrompt(command, workers) {
 export function createJarvisRelay({ port = DEFAULT_PORT, host = "127.0.0.1", mode = process.env.JARVIS_RELAY_MODE ?? "mock", repoRoot, spawnRunner = runProcess } = {}) {
   if (!["mock", "live"].includes(mode)) throw new Error("JARVIS_RELAY_MODE must be mock or live.");
   const resolvedRoot = repoRoot ?? resolve(dirname(fileURLToPath(import.meta.url)), "..");
+  if (mode === "live") loadLocalGitHubPat(resolvedRoot);
   const operations = new Map();
 
   function event(operation, type, message, extra = {}) {
