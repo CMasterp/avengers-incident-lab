@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "updatedAt": "2026-09-09T16:10:00.000Z",
+  "updatedAt": "2026-09-09T16:20:00.000Z",
   "mission": {
     "status": "awaiting_approval",
     "label": "Nexus auth refactor contained",
-    "summary": "Three evidence-backed threats are ready for operator approval. JARVIS has not posted any review comment."
+    "summary": "Three evidence-backed findings are ready for operator approval. JARVIS has not posted any review comment."
   },
   "liveMonitor": {
     "phase": "awaiting_approval",
@@ -83,6 +83,18 @@
       "at": "2026-09-09T16:10:00.000Z",
       "event": "Awaiting operator approval",
       "detail": "JARVIS has prepared three findings. No GitHub review comment has been posted.",
+      "state": "pending"
+    },
+    {
+      "at": "2026-09-09T16:20:00.000Z",
+      "event": "Investigation consolidated",
+      "detail": "Three specialists completed read-only GitHub analysis of PR #1; duplicate findings were merged.",
+      "state": "complete"
+    },
+    {
+      "at": "2026-09-09T16:20:00.000Z",
+      "event": "Awaiting operator approval",
+      "detail": "JARVIS has prepared three evidence-backed findings. No GitHub review comment has been posted.",
       "state": "pending"
     }
   ],
