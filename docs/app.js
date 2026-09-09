@@ -1,4 +1,5 @@
 const repository = "CMasterp/avengers-incident-lab";
+const apiReportUrl = `https://api.github.com/repos/${repository}/contents/docs/mission-report.json?ref=main`;
 const rawReportUrl = `https://raw.githubusercontent.com/${repository}/main/docs/mission-report.json`;
 const localReportUrl = "./mission-report.json";
 
@@ -104,16 +105,26 @@ function renderThreads(threads) {
 async function fetchReport() {
   elements.sourceStatus.textContent = "SYNCING MISSION FEED";
   const isLocalPreview = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
-  const sources = isLocalPreview ? [localReportUrl] : [rawReportUrl, localReportUrl];
+  const sources = isLocalPreview
+    ? [{ url: localReportUrl, kind: "json" }]
+    : [
+        { url: apiReportUrl, kind: "github-content" },
+        { url: rawReportUrl, kind: "json" },
+        { url: localReportUrl, kind: "json" }
+      ];
   let lastError;
 
   for (const source of sources) {
     try {
-      const response = await fetch(`${source}?cache=${Date.now()}`, { cache: "no-store" });
+      const separator = source.url.includes("?") ? "&" : "?";
+      const response = await fetch(`${source.url}${separator}cache=${Date.now()}`, { cache: "no-store" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const report = await response.json();
+      const payload = await response.json();
+      const report = source.kind === "github-content"
+        ? JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(payload.content.replace(/\n/g, "")), (character) => character.charCodeAt(0))))
+        : payload;
       renderReport(report);
-      elements.sourceStatus.textContent = source === rawReportUrl ? "LIVE GITHUB INTEL" : "LOCAL INTEL FALLBACK";
+      elements.sourceStatus.textContent = source.kind === "github-content" ? "LIVE GITHUB INTEL" : "LOCAL INTEL FALLBACK";
       return;
     } catch (error) {
       lastError = error;
@@ -126,4 +137,4 @@ async function fetchReport() {
 
 elements.refresh.addEventListener("click", fetchReport);
 fetchReport();
-window.setInterval(fetchReport, 15000);
+window.setInterval(fetchReport, 120000);
