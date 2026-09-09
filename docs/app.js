@@ -103,7 +103,8 @@ function renderThreads(threads) {
 
 async function fetchReport() {
   elements.sourceStatus.textContent = "SYNCING MISSION FEED";
-  const sources = location.protocol === "file:" ? [localReportUrl] : [rawReportUrl, localReportUrl];
+  const isLocalPreview = location.protocol === "file:" || ["localhost", "127.0.0.1"].includes(location.hostname);
+  const sources = isLocalPreview ? [localReportUrl] : [rawReportUrl, localReportUrl];
   let lastError;
 
   for (const source of sources) {

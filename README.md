@@ -15,3 +15,14 @@ Controlled GitHub repository for the **Infinity Incident Detective** demo.
 5. After a correction, explicitly authorize JARVIS to resolve a verified thread.
 
 The dashboard is static. It reads its live report from this repository's public raw GitHub URL; it never stores a GitHub token or invokes GitHub mutation APIs from the browser.
+
+## Start the agent
+
+```bash
+cp .env.example .env
+# Set GITHUB_PAT in .env, then:
+set -a && source .env && set +a
+codex
+```
+
+The repository-scoped `.mcp.json` exposes the GitHub MCP server to the coding agent. Follow `AGENTS.md` and `JARVIS_PLAYBOOK.md`; the dashboard itself is intentionally read-only.
